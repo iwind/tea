@@ -22,9 +22,10 @@ Your Code  |----- JSON Data
 namespace app\actions\orders;
 
 use tea\Action;
+use tea\upload\File;
 
 class OrderAction extends Action {
-	public function index(string $name, int $age, bool $drinking) {
+	public function index(string $name, int $age, bool $drinking, File $teaFile) {
 		$this->success("Thank You");
 	}
 }

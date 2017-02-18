@@ -8,7 +8,7 @@ use tea\Arrays;
  * 上传服务
  */
 class Upload {
-	private $_items = [];
+	private $_files = [];
 
 	/**
 	 * 取得服务实例
@@ -25,32 +25,32 @@ class Upload {
 	 * - add($field)
 	 * - add([ $field, $index ])
 	 * - add([ $field, $index1, $index2, ... ])
-	 * - add(Item $item)
+	 * - add(File $file)
 	 *
-	 * @param string|array|Item $item 条目
+	 * @param string|array|File $file 条目
 	 * @param array $validator 校验规则
-	 * @return null|Item
+	 * @return null|File
 	 */
-	public function add($item, array $validator = []) {
-		if (is_string($item)) {
-			$item = new Item($item);
-			$item->setValidator($validator);
-			$this->_items[] = $item;
+	public function add($file, array $validator = []) {
+		if (is_string($file)) {
+			$file = new File($file);
+			$file->setValidator($validator);
+			$this->_files[] = $file;
 		}
-		else if (is_array($item) && count($item) >= 2) {
-			$item = new Item($item[0], array_slice($item, 1));
-			$item->setValidator($validator);
-			$this->_items[] = $item;
+		else if (is_array($file) && count($file) >= 2) {
+			$file = new File($file[0], array_slice($file, 1));
+			$file->setValidator($validator);
+			$this->_files[] = $file;
 		}
-		else if (is_object($item) && !($item instanceof Item)) {
-			/* @var Item $item  */
-			$item->setValidator($validator);
-			$this->_items[] = $item;
+		else if (is_object($file) && !($file instanceof File)) {
+			/* @var File $file  */
+			$file->setValidator($validator);
+			$this->_files[] = $file;
 		}
 		else {
-			$item = null;
+			$file = null;
 		}
-		return $item;
+		return $file;
 	}
 
 	/**
@@ -58,39 +58,39 @@ class Upload {
 	 *
 	 * @param array $fields 条目字段名称集合
 	 * @param array $validator 校验规则
-	 * @return item[]
+	 * @return file[]
 	 */
 	public function addAll(array $fields, array $validator = []) {
-		$items = [];
+		$files = [];
 		foreach ($fields as $field) {
-			$items[] = $this->add($field, $validator);
+			$files[] = $this->add($field, $validator);
 		}
-		return $items;
+		return $files;
 	}
 
 	/**
 	 * 开始接收
 	 */
 	public function receive() {
-		foreach ($this->_items as $item) {
-			/** @var Item $item */
-			if ($item->index() === false) {
-				if (isset($_FILES[$item->field()])) {
-					$this->_setItemInfo($item, $_FILES[$item->field()]);
-					$item->validate();
+		foreach ($this->_files as $file) {
+			/** @var File $file */
+			if ($file->index() === false) {
+				if (isset($_FILES[$file->field()])) {
+					$this->_setFileInfo($file, $_FILES[$file->field()]);
+					$file->validate();
 				}
 			}
 			else {
-				if (isset($_FILES[$item->field()]) && is_array($_FILES[$item->field()])) {
-					$infos = $_FILES[$item->field()];
-					$index = $item->index();
+				if (isset($_FILES[$file->field()]) && is_array($_FILES[$file->field()])) {
+					$infos = $_FILES[$file->field()];
+					$index = $file->index();
 
-					$item->setName(Arrays::get($infos["name"], $index));
-					$item->setType(Arrays::get($infos["type"], $index));
-					$item->setTmp(Arrays::get($infos["tmp_name"], $index));
-					$item->setError(Arrays::get($infos["error"], $index));
-					$item->setSize(Arrays::get($infos["size"], $index));
-					$item->validate();
+					$file->setName(Arrays::get($infos["name"], $index));
+					$file->setType(Arrays::get($infos["type"], $index));
+					$file->setTmp(Arrays::get($infos["tmp_name"], $index));
+					$file->setError(Arrays::get($infos["error"], $index));
+					$file->setSize(Arrays::get($infos["size"], $index));
+					$file->validate();
 				}
 			}
 		}
@@ -102,50 +102,50 @@ class Upload {
 	 * @param string $field 表单字段名
 	 * @param string $path 目标路径
 	 * @param null|string $dir 目标路径的父级目录
-	 * @return Item
+	 * @return File
 	 */
 	public function receiveImage($field, $path, $dir = null) {
-		$item = $this->add($field, [
+		$file = $this->add($field, [
 			"ext" => [ "jpg", "jpeg", "png", "gif", "bmp" ]
 		]);
 		$this->receive();
-		if ($item->success()) {
-			$item->put($path, $dir);
+		if ($file->success()) {
+			$file->put($path, $dir);
 		}
-		return $item;
+		return $file;
 	}
 
 	/**
 	 * 设置条目信息
 	 *
-	 * @param Item $item 条目对象
+	 * @param File $file 条目对象
 	 * @param array $info 信息
 	 */
-	private function _setItemInfo($item, array $info) {
+	private function _setFileInfo($file, array $info) {
 		if (isset($info["name"])) {
-			$item->setName($info["name"]);
+			$file->setName($info["name"]);
 		}
 		if (isset($info["type"])) {
-			$item->setType($info["type"]);
+			$file->setType($info["type"]);
 		}
 		if (isset($info["tmp_name"])) {
-			$item->setTmp($info["tmp_name"]);
+			$file->setTmp($info["tmp_name"]);
 		}
 		if (isset($info["error"])) {
-			$item->setError($info["error"]);
+			$file->setError($info["error"]);
 		}
 		if (isset($info["size"])) {
-			$item->setSize($info["size"]);
+			$file->setSize($info["size"]);
 		}
 	}
 
 	/**
 	 * 取得所有条目
 	 *
-	 * @return Item[]
+	 * @return File[]
 	 */
-	public function items() {
-		return $this->_items;
+	public function files() {
+		return $this->_files;
 	}
 
 	/**
@@ -153,13 +153,13 @@ class Upload {
 	 *
 	 * @param string $field 条目字段名
 	 * @param integer|boolean $index 索引，用在多个同名文件选择框批量上传
-	 * @return Item
+	 * @return File
 	 */
-	public function item($field, $index = false) {
-		foreach ($this->_items as $item) {
-			/* @var Item $item */
-			if ($item->field() === $field && $item->index() === $index) {
-				return $item;
+	public function file($field, $index = false) {
+		foreach ($this->_files as $file) {
+			/* @var File $file */
+			if ($file->field() === $field && $file->index() === $index) {
+				return $file;
 			}
 		}
 		return null;
@@ -171,9 +171,9 @@ class Upload {
 	 * @return boolean true|false
 	 */
 	public function success() {
-		foreach ($this->_items as $item) {
-			/* @var Item $item */
-			if (!$item->success()) {
+		foreach ($this->_files as $file) {
+			/* @var File $file */
+			if (!$file->success()) {
 				return false;
 			}
 		}

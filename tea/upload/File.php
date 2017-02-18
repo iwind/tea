@@ -5,7 +5,7 @@ namespace tea\upload;
 /**
  * 上传文件条目
  */
-class Item {
+class File {
 	const ERROR_MIN = 1;
 	const ERROR_MAX = 2;
 	const ERROR_TYPE = 4;
@@ -26,9 +26,9 @@ class Item {
 
 	public static function newForParam($param) {
 		$upload = Upload::new();
-		$item = $upload->add($param);
+		$file = $upload->add($param);
 		$upload->receive();
-		return $item;
+		return $file;
 	}
 
 	/**
