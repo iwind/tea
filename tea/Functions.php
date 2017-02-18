@@ -148,6 +148,16 @@ namespace {
 	}
 
 	/**
+	 * 取得文件对象
+	 *
+	 * @param string $filename 文件名
+	 * @return tea\file\File
+	 */
+	function f($filename) {
+		return new tea\file\File($filename);
+	}
+
+	/**
 	 * 构造URL
 	 *
 	 * @param string $action 动作，支持前面用一个点（.）表示当前控制器，两个点表示上级控制器
@@ -484,7 +494,18 @@ namespace {
 						break;
 					default:
 						if (preg_match("/\\\\/", $typeString)) {
-							$value = call_user_func([$typeString, "new"]);
+							if (method_exists($typeString, "newForParam")) {
+								$value = call_user_func([ $typeString, "newForParam" ], $parameter->getName());
+							}
+							else if (method_exists($typeString, "new")) {
+								$value = call_user_func([$typeString, "new"]);
+							}
+							else if (method_exists($typeString, "shared")) {
+								$value = call_user_func([$typeString, "shared"]);
+							}
+							else {
+								$value = new $typeString;
+							}
 						}
 				}
 			}

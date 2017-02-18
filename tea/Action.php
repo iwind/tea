@@ -127,19 +127,19 @@ abstract class Action {
 
 		$this->before();
 
-		if (method_exists($this, "index")) {
-			$result = invoke($this, "index", Tea::shared()->request()->params());
+		if (method_exists($this, "run")) {
+			$result = invoke($this, "run", Tea::shared()->request()->params());
 
 			//@TODO 根据 $result 做不同的处理
 		}
 		else {
-			throw new Exception("should implement 'index' method in action '" . static::class . "'");
+			throw new Exception("should implement 'run' method in action '" . static::class . "'");
 		}
 		$this->after();
 	}
 
 	private function _showDocs() {
-		$reflectionMethod = new \ReflectionMethod($this, "index");
+		$reflectionMethod = new \ReflectionMethod($this, "run");
 
 		$docs = [];
 		$content = "";
@@ -391,6 +391,7 @@ FOOTER;
 			$actionObject->parent($parentActionName)
 				->directive($directive)
 				->name($actionName)
+				->view($actionName)
 				->invoke($reflectionClass);
 		} catch (ActionResultException $e) {
 

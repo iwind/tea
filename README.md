@@ -5,12 +5,12 @@
 *每一段代码，都能自动适应多个用途*
  
 ~~~
-Your Code  |------- JSON Data
-           |------- Remote Service
-           |------- API Docs
-           |------- HTML View  --|----- AngularJS
-                                 |----- Vue.js
-                                 | ......
+Your Code  |----- JSON Data
+           |----- Remote Service
+           |----- API Docs
+           |----- HTML View  --|----- AngularJS
+                               |----- Vue.js
+                               | ......
           			
 ~~~
 

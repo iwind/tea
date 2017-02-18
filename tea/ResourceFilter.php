@@ -120,6 +120,10 @@ class ResourceFilter extends Filter  {
 	public function before(&$object) {
 		$path = TEA_APP . "/views/" . $object;
 		$ext = trim(strtolower(pathinfo($path, PATHINFO_EXTENSION)));
+		if (in_array($ext, [ "php" ])) {
+			Tea::shared()->stop();
+			return false;
+		}
 		if (isset(self::$_mimeTypes[$ext])) {
 			header("Content-Type:" . self::$_mimeTypes[$ext]);
 		}
