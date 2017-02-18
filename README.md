@@ -1,0 +1,33 @@
+#TeaPHP
+ 
+*喝着茶，唱着歌，就能把活给干了*
+
+*每一段代码，都能自动适应多个用途*
+ 
+~~~
+Your Code  |------- JSON Data
+           |------- Remote Service
+           |------- API Docs
+           |------- HTML View  --|----- AngularJS
+                                 |----- Vue.js
+                                 | ......
+          			
+~~~
+
+
+##示例
+~~~php
+<?php
+
+namespace app\actions\orders;
+
+use tea\Action;
+
+class OrderAction extends Action {
+	public function index(string $name, int $age, bool $drinking) {
+		$this->success("Thank You");
+	}
+}
+
+?>
+~~~
