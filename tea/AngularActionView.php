@@ -8,7 +8,7 @@ class AngularActionView extends ActionView {
 		$parent = $this->action()->parent();
 		$viewName = $this->action()->view();
 
-		$json = json_encode($data);
+		$json = htmlspecialchars_decode(json_encode($data));
 		$data->tea = (object)[
 			"inject" => "<script type=\"text/javascript\">\n window.TEA = { 
 	\"ACTION\": {

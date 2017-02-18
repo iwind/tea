@@ -45,7 +45,7 @@ namespace tea {
 	/**
 	 * 虚拟的空指针，用于定义未定义的参数
 	 */
-	define("TEA_NIL", "__TEAL__NIL__");
+	define("nil", "__TEAL__NIL__");
 
 	/**
 	 * 当前使用的域名

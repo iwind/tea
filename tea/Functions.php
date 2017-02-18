@@ -246,7 +246,7 @@ namespace {
 	 * @return bool
 	 */
 	function is_nil($var) {
-		return $var === TEA_NIL;
+		return $var === nil;
 	}
 
 	/**
@@ -305,8 +305,8 @@ namespace {
 	 * @param mixed $default 默认值
 	 * @return mixed
 	 */
-	function cookie($name = TEA_NIL, $default = null) {
-		if ($name === TEA_NIL) {
+	function cookie($name = nil, $default = null) {
+		if ($name === nil) {
 			return is_array($_COOKIE) ? $_COOKIE : [];
 		}
 		return $_COOKIE[$name] ?? $default;

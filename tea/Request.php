@@ -15,8 +15,8 @@ class Request {
 		}
 	}
 
-	public function param($param, $value = TEA_NIL) {
-		if ($value !== TEA_NIL) {
+	public function param($param, $value = nil) {
+		if ($value !== nil) {
 			$this->_params[$param] = $value;
 		}
 		return $this->_params[$param] ?? null;

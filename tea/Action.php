@@ -31,7 +31,7 @@ abstract class Action {
 		return $this;
 	}
 
-	public function parent($parent = TEA_NIL) {
+	public function parent($parent = nil) {
 		if (is_nil($parent)) {
 			return $this->_parent;
 		}
@@ -39,7 +39,7 @@ abstract class Action {
 		return $this;
 	}
 
-	public function name($name = TEA_NIL) {
+	public function name($name = nil) {
 		if (is_nil($name)) {
 			return $this->_name;
 		}
@@ -47,7 +47,7 @@ abstract class Action {
 		return $this;
 	}
 
-	public function view($view = TEA_NIL) {
+	public function view($view = nil) {
 		if (is_nil($view)) {
 			return $this->_view;
 		}
@@ -128,12 +128,15 @@ abstract class Action {
 		$this->before();
 
 		if (method_exists($this, "run")) {
-			$result = invoke($this, "run", Tea::shared()->request()->params());
+			$encodedParams = array_map(function ($value) {
+				return htmlspecialchars($value);
+			}, Tea::shared()->request()->params());
+			$result = invoke($this, "run", $encodedParams);
 
 			//@TODO 根据 $result 做不同的处理
 		}
 		else {
-			throw new Exception("should implement 'run' method in action '" . static::class . "'");
+			throw new Exception("should implement 'run()' method in action '" . static::class . "'");
 		}
 		$this->after();
 	}

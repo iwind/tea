@@ -132,13 +132,13 @@ class Arrays {
 		if (empty($key)) {
 			$asc ? asort($array) : arsort($array);
 		} else {
-			$GLOBALS["TEA_ARRAY_SORT_KEY_" . TEA_NIL] = $key;
+			$GLOBALS["TEA_ARRAY_SORT_KEY_" . nil] = $key;
 			uasort($array,
-				$asc ? create_function('$p1,$p2', '$key=$GLOBALS["TEA_ARRAY_SORT_KEY_" . TEA_NIL];$p1=\tea\Arrays::get($p1,$key);$p2=\tea\Arrays::get($p2,$key);if ($p1>$p2){return 1;}elseif($p1==$p2){return 0;}else{return -1;}')
+				$asc ? create_function('$p1,$p2', '$key=$GLOBALS["TEA_ARRAY_SORT_KEY_" . nil];$p1=\tea\Arrays::get($p1,$key);$p2=\tea\Arrays::get($p2,$key);if ($p1>$p2){return 1;}elseif($p1==$p2){return 0;}else{return -1;}')
 					:
-					create_function('$p1,$p2', '$key=$GLOBALS["TEA_ARRAY_SORT_KEY_" . TEA_NIL];$p1=\tea\Arrays::get($p1,$key);$p2=\tea\Arrays::get($p2,$key);if ($p1<$p2){return 1;}elseif($p1==$p2){return 0;}else{return -1;}')
+					create_function('$p1,$p2', '$key=$GLOBALS["TEA_ARRAY_SORT_KEY_" . nil];$p1=\tea\Arrays::get($p1,$key);$p2=\tea\Arrays::get($p2,$key);if ($p1<$p2){return 1;}elseif($p1==$p2){return 0;}else{return -1;}')
 			);
-			unset($GLOBALS["TEA_ARRAY_SORT_KEY_" . TEA_NIL]);
+			unset($GLOBALS["TEA_ARRAY_SORT_KEY_" . nil]);
 		}
 		return $array;
 	}

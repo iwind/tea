@@ -48,8 +48,8 @@ class Tea {
 		return $this;
 	}
 
-	public function actionView($actionView = TEA_NIL) {
-		if ($actionView === TEA_NIL) {
+	public function actionView($actionView = nil) {
+		if ($actionView === nil) {
 			return $this->_actionView;
 		}
 		$this->_actionView = $actionView;
