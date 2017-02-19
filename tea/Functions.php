@@ -1,6 +1,9 @@
 <?php
 
 namespace {
+
+	use tea\Tea;
+
 	/**
 	 * 打印数据的内容
 	 *
@@ -461,11 +464,10 @@ namespace {
 		$method = $reflection->getMethod($method);
 		$methodArgs = [];
 		foreach ($method->getParameters() as $parameter) {
-			if ($parameter->isDefaultValueAvailable()) {
+			$value = $args[$parameter->getName()] ?? null;
+
+			if (is_null($value) && $parameter->isDefaultValueAvailable()) {
 				$value = $parameter->getDefaultValue();
-			}
-			else {
-				$value = $args[$parameter->getName()] ?? null;
 			}
 
 			if ($parameter->hasType()) {

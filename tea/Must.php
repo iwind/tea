@@ -7,6 +7,10 @@ class Must {
 	private $_shouldThrow = false;
 
 	public static function new () {
+		return self::shared();
+	}
+
+	public static function shared () {
 		if (self::$_instance == null) {
 			self::$_instance = new static;
 		}
