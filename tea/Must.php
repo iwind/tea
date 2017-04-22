@@ -74,7 +74,7 @@ class Must {
 		return $this;
 	}
 
-	public function string(&$var, $default) {
+	public function string(&$var, $default = "") {
 		$var = strval($var);
 		if (strlen($var) == 0) {
 			$var = $default;

@@ -3,7 +3,14 @@
 namespace tea;
 
 class Job {
-	public function code() {}
+	public function code() {
+		return __CLASS__;
+	}
+
+	public function when() {
+		return false;
+	}
+
 	//public function run() {}
 
 	/**

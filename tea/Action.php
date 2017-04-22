@@ -9,6 +9,8 @@ abstract class Action {
 	private $_view = "index";
 	private $_name;
 	private $_parent;
+	private $_output = true;
+	private $_params = [];
 	private $_response = [
 		"code" => 500,
 		"message" => null,
@@ -20,10 +22,26 @@ abstract class Action {
 		$this->data = new \stdClass();
 	}
 
+	/**
+	 * Action执行前调用，供子类覆盖
+	 */
 	public function before() {
 	}
 
+	/**
+	 * Action执行后调用，供子类覆盖
+	 */
 	public function after() {
+	}
+
+	public function param($param, $value) {
+		$this->_params[$param] = $value;
+		return $this;
+	}
+
+	public function params(array $params) {
+		$this->_params = $params;
+		return $this;
 	}
 
 	public function directive($directive) {
@@ -55,6 +73,11 @@ abstract class Action {
 		return $this;
 	}
 
+	public function output($output = true) {
+		$this->_output = $output;
+		return $this;
+	}
+
 	public function code($code) {
 		$this->_response["code"] = $code;
 		return $this;
@@ -74,13 +97,17 @@ abstract class Action {
 		$this->after();
 
 		if ($this->_directive == "json") {
-			header("Content-Type: application/json");
+			if ($this->_output) {
+				header("Content-Type: application/json");
+			}
 
 			$this->_response["code"] = 200;
 			$this->_response["message"] = $message;
 			$this->_response["data"] = $this->data;
 
-			echo json_encode($this->_response, JSON_PRETTY_PRINT);
+			if ($this->_output) {
+				echo json_encode($this->_response, JSON_PRETTY_PRINT);
+			}
 		}
 		else if ($_SERVER["REQUEST_METHOD"] == "GET") {
 			/**
@@ -91,16 +118,22 @@ abstract class Action {
 			$actionView->show();
 		}
 		else {
-			header("Content-Type: application/json");
+			if ($this->_output) {
+				header("Content-Type: application/json");
+			}
 
 			$this->_response["code"] = 200;
 			$this->_response["message"] = $message;
 			$this->_response["data"] = $this->data;
 
-			echo json_encode($this->_response);
+			if ($this->_output) {
+				echo json_encode($this->_response);
+			}
 		}
 
-		throw new ActionResultException();
+		$exception = new ActionResultException();
+		$exception->setData($this->_response);
+		throw $exception;
 	}
 
 	public function next($next, array $params = [], $hash = "") {
@@ -119,7 +152,7 @@ abstract class Action {
 		return $this;
 	}
 
-	public function invoke(\ReflectionClass $reflectionClass) {
+	public function invoke() {
 		if ($this->_directive == "doc") {
 			$this->_showDocs();
 			return $this;
@@ -128,12 +161,22 @@ abstract class Action {
 		$this->before();
 
 		if (method_exists($this, "run")) {
-			$encodedParams = array_map(function ($value) {
-				return htmlspecialchars($value);
-			}, Tea::shared()->request()->params());
-			$result = invoke($this, "run", $encodedParams);
+			$params = array_merge(Tea::shared()->request()->params(), $this->_params);
+			$result = invoke($this, "run", $params);
 
 			//@TODO 根据 $result 做不同的处理
+
+			if (is_null($result)) {
+				$this->success();
+			}
+			else if (is_int($result)) {
+				if ($result == 200) {
+					$this->success();
+				}
+				else {
+					$this->error($result);
+				}
+			}
 		}
 		else {
 			throw new Exception("should implement 'run()' method in action '" . static::class . "'");
@@ -364,8 +407,8 @@ FOOTER;
 
 	}
 
-	public static function runAction($path, $directive = null) {
-		$action = preg_replace("/\\/{2,}/", "/", $path);
+	public static function runAction($path, $directive = null, $return = false, $params = null) {
+		$action = preg_replace("/\\/{2,}/", "/", rtrim($path, "/"));
 		if (substr($action, 0, 1) != "/") {
 			$action = "/" . $action;
 		}
@@ -390,15 +433,26 @@ FOOTER;
 		/** @var Action $actionObject */
 		$actionObject = $reflectionClass->newInstance();
 
+		$oldRequestMethod = $_SERVER["REQUEST_METHOD"];
 		try {
+			if ($return) {
+				$_SERVER["REQUEST_METHOD"] = "POST";
+			}
 			$actionObject->parent($parentActionName)
 				->directive($directive)
 				->name($actionName)
 				->view($actionName)
-				->invoke($reflectionClass);
+				->output(!$return)
+				->params(is_array($params) ? $params : [])
+				->invoke();
 		} catch (ActionResultException $e) {
-
+			$_SERVER["REQUEST_METHOD"] = $oldRequestMethod;
+			return $e->data();
 		}
+	}
+
+	public static function callAction($path, array $params = []) {
+		return self::runAction($path, null, true, $params);
 	}
 }
 

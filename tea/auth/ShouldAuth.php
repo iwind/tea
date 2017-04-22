@@ -12,7 +12,7 @@ class ShouldAuth {
 	}
 
 	public function __construct($ns) {
-		$this->_ns = $ns;
+		$this->_ns = $ns . "@" . ip();
 	}
 
 	public function attrs() {

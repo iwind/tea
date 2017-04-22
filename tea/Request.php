@@ -4,6 +4,19 @@ namespace tea;
 
 class Request {
 	private $_params = [];
+	private static $_instance;
+
+	/**
+	 * 取得共享实例
+	 *
+	 * @return Request
+	 */
+	public static function shared() {
+		if (self::$_instance == null) {
+			self::$_instance = new self;
+		}
+		return self::$_instance;
+	}
 
 	public function __construct() {
 		//合并参数
@@ -25,6 +38,7 @@ class Request {
 	public function params() {
 		return $this->_params;
 	}
+
 }
 
 ?>

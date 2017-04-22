@@ -2,8 +2,6 @@
 
 namespace tea\auth;
 
-use tea\Tea;
-
 class MustAuth extends ShouldAuth {
 	public static function newForParam($param) {
 		session_init();
