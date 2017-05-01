@@ -33,7 +33,7 @@ namespace tea {
 	/**
 	 * 应用程序目录
 	 */
-	define("TEA_APP", TEA_ROOT . DS . "app/");
+	define("TEA_APP", TEA_ROOT . DS . "app");
 
 	/**
 	 * Tea类库所在路径

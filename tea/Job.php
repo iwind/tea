@@ -3,8 +3,70 @@
 namespace tea;
 
 class Job {
+	private $_params = [];
+	private $_subCode;
+
+	/**
+	 * 构造器
+	 */
+	public function __construct() {
+		$this->_params = get_cmd_args();
+	}
+
 	public function code() {
 		return __CLASS__;
+	}
+
+	/**
+	 * 子命令代号
+	 *
+	 * 同一个命令类可以处理多个命令，然后使用subCode区分
+	 *
+	 * @return string
+	 */
+	public function subCode() {
+		return $this->_subCode;
+	}
+
+	/**
+	 * 设置一组参数
+	 *
+	 * @param array $params 一组参数键值对
+	 */
+	public function setParams(array $params) {
+		$this->_params = $params;
+	}
+
+	/**
+	 * 取得参数值
+	 *
+	 * @param string $key 键值
+	 * @return string|null
+	 */
+	public function param($key) {
+		if (isset($this->_params[$key])) {
+			return $this->_params[$key];
+		}
+		return null;
+	}
+
+	/**
+	 * 判断是否有某个参数
+	 *
+	 * @param string $key 键值
+	 * @return boolean
+	 */
+	public function hasParam($key) {
+		return isset($this->_params[$key]);
+	}
+
+	/**
+	 * 设置子命令代号
+	 *
+	 * @param string $subCode 子命令代号
+	 */
+	public function setSubCode($subCode) {
+		$this->_subCode = $subCode;
 	}
 
 	public function when() {

@@ -1,9 +1,6 @@
 <?php
 
 namespace {
-
-	use tea\Tea;
-
 	/**
 	 * 打印数据的内容
 	 *
@@ -484,7 +481,7 @@ namespace {
 						break;
 					case "string":
 						$value = strval($value);
-						$value = trim($value);
+						$value = htmlspecialchars(trim($value));
 						break;
 					case "bool":
 						$value = boolval($value);
@@ -570,6 +567,28 @@ namespace {
 		}
 
 		//trigger_error("'" . $class . "' not found", E_USER_ERROR);
+	}
+
+	/**
+	 * 转换数据为标量集合
+	 *
+	 * @param mixed $value 要转换的数据
+	 * @param bool $deep 是否深度转换
+	 * @return mixed
+	 */
+	function normalize($value, $deep = true) {
+		if (!is_object($value)) {
+			return $value;
+		}
+		$vars = get_object_vars($value);
+		if ($deep) {
+			foreach ($vars as $key => &$var) {
+				if(is_object($var)) {
+					$var = normalize($var, $deep);
+				}
+			}
+		}
+		return $vars;
 	}
 }
 

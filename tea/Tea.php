@@ -143,28 +143,56 @@ class Tea {
 		$args = get_cmd_args();
 		if (isset($args["job"])) {
 			$jobCode = $args["job"];
-			$dir = opendir(TEA_APP . "/jobs");
+
+			$jobDirs = [
+				[ TEA_APP . "/jobs", "app\\jobs", $jobCode ],
+			];
+
+			if (preg_match("/^:(\\w+)\\.(.+)$/", $jobCode, $match)) {
+				$jobDirs = [
+					[ TEA_APP . "/libs/" . $match[1] . "/jobs", $match[1], $match[2] ],
+					[ TEA_LIBS . "/tea/" . $match[1] . "/jobs", "tea\\" . $match[1] . "\\jobs", $match[2] ],
+				];
+			}
+
+			//从jobs下读取
 			$found = false;
-			while (($file = readdir($dir)) !== false) {
-				if (preg_match("/^(.+)\\.php$/", $file, $match)) {
-					$fullFile = TEA_APP . "/jobs/{$file}";
-					$class = $match[1];
-					require $fullFile;
+			foreach ($jobDirs as $config) {
+				$jobDir = $config[0];
+				$namespace = $config[1];
+				$code = $config[2];
 
-					$class = "app\\jobs\\{$class}";
-					$obj = new $class;
-					$codes = $obj->code();
-					if (!is_array($codes)) {
-						$codes = [ $codes ];
-					}
-					if (in_array($jobCode, $codes)) {
-						invoke($obj, "run", $args);
+				if (!is_dir($jobDir)) {
+					continue;
+				}
+				$dir = opendir($jobDir);
+				while (($file = readdir($dir)) !== false) {
+					if (preg_match("/^(.+)\\.php$/", $file, $match)) {
+						$fullFile = $jobDir . "/" . $file;
+						$class = $match[1];
+						require $fullFile;
 
-						$found = true;
+						$class = $namespace . "\\{$class}";
+
+						/**
+						 * @var Job $obj
+						 */
+						$obj = new $class;
+						$codes = $obj->code();
+						if (!is_array($codes)) {
+							$codes = [$codes];
+						}
+						if (in_array($code, $codes)) {
+							$obj->setSubCode($code);
+
+							invoke($obj, "run", $args);
+
+							$found = true;
+						}
 					}
 				}
+				closedir($dir);
 			}
-			closedir($dir);
 
 			if (!$found) {
 				echo "[Tea Says]\n  Can not find job with code '{$jobCode}'\n";
@@ -173,6 +201,9 @@ class Tea {
 		else if (isset($args["test"])) {
 			$job = new TestJob();
 			$job->run();
+		}
+		else {
+			echo "Usage:\n    job [Job Code]\n    test [Case]\n";
 		}
 	}
 }
