@@ -86,10 +86,21 @@ class Tea {
 			}
 		}
 
+		//从URL中获取ACTION
+		$path = $originPath;
+		if (!is_empty(TEA_URL_DISPATCHER)) {
+			$path = preg_replace("/^" . preg_quote(TEA_URL_DISPATCHER, "/") . "/", "", $path);
+		}
+		if (TEA_ENABLE_ACTION_PARAM) {
+			$actionValue = Request::shared()->param("__ACTION__");
+			if (!is_empty($actionValue)) {
+				$path = $actionValue;
+			}
+		}
+
 		//匹配其中的指令
 		$directive = null;
-		$path = $originPath;
-		if (preg_match("/^\\/__(\\w+)__(\\/.+)$/", $originPath, $match)) {
+		if (preg_match("/^\\/__(\\w+)__(\\/.+)$/", $path, $match)) {
 			$directive = $match[1];
 			$path = $match[2];
 		}

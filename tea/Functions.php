@@ -1,6 +1,9 @@
 <?php
 
 namespace {
+
+	use tea\Action;
+
 	/**
 	 * 打印数据的内容
 	 *
@@ -163,11 +166,14 @@ namespace {
 	 * @param string $action 动作，支持前面用一个点（.）表示当前控制器，两个点表示上级控制器
 	 * @param array $params 参数
 	 * @param string $hash Hash
+	 * @param boolean $isResource 是否为资源
 	 * @return string
 	 */
-	function u($action, array $params = [], $hash = null) {
+	function u($action, array $params = [], $hash = null, $isResource = false) {
+		$module = defined("TEA_MODULE") ? TEA_MODULE : "";
+
 		if (substr($action, 0, 2) === "..") {
-			$controller = TEA_CONTROLLER;
+			$controller = Action::currentAction()->parent();
 			$pos = strrpos($controller, ".");
 			if ($pos === false) {
 				$action = substr($action, 2);
@@ -175,28 +181,41 @@ namespace {
 			else {
 				$action = substr($controller, 0, $pos) . substr($action, 1);
 			}
-			if (TEA_MODULE != "_") {
-				$action = "@" . TEA_MODULE . "." . $action;
+			if ($module != "") {
+				$action = "@" . $module . "." . $action;
 			}
 		}
 		else if (substr($action, 0, 1) == ".") {
-			$action = TEA_CONTROLLER . $action;
-			if (TEA_MODULE != "_") {
-				$action = "@" . TEA_MODULE . "." . $action;
+			$action = Action::currentAction()->parent() . $action;
+			if ($module != "") {
+				$action = "@" . $module . "." . $action;
 			}
 		}
-		else if (TEA_MODULE != "_") {
+		else if ($module != "") {
 			if ($action == "@") {
-				$action = "@" . TEA_MODULE;
+				$action = "@" . $module;
 			}
 			else {
-				$action = str_replace("@.", "@" . TEA_MODULE . ".", $action);
+				$action = str_replace("@.", "@" . $module . ".", $action);
 			}
 		}
 		$action = trim($action, ".");
-		$url = TEA_URL_BASE . TEA_URL_DISPATCHER . "/"  . str_replace(".", "/", $action);
+		$dirname = ltrim(str_replace(".", "/", $isResource ? dirname($action) : $action), "/");
+		$basename = $isResource ? "/" .  basename($action) : "";
+
+		if (TEA_ENABLE_ACTION_PARAM) {
+			$url = TEA_URL_BASE . TEA_URL_DISPATCHER . "?__ACTION__=/" . $dirname . $basename;
+		}
+		else {
+			$url = TEA_URL_BASE . TEA_URL_DISPATCHER . "/" . $dirname . $basename;
+		}
 		if (!empty($params)) {
-			$url .= "?" . http_build_query($params);
+			if (strstr($url, "?")) {
+				$url .= "&" . http_build_query($params);
+			}
+			else {
+				$url .= "?" . http_build_query($params);
+			}
 		}
 		if (!is_null($hash)) {
 			if (is_array($hash)) {
@@ -207,6 +226,19 @@ namespace {
 			}
 		}
 		return $url;
+	}
+
+	/**
+	 * 跳转URL
+	 *
+	 * @param string $action 动作，支持前面用一个点（.）表示当前控制器，两个点表示上级控制器
+	 * @param array $params 参数
+	 * @param string $hash Hash
+	 * @return string
+	 */
+	function g($action, array $params = [], $hash = null) {
+		header("location:" . u($action, $params, $hash));
+		exit();
 	}
 
 	/**
@@ -514,32 +546,41 @@ namespace {
 	}
 
 	function import_class($class) {
-		$count = 0;
 		$classFile = str_replace("\\", "/", $class) . ".php";
 
 		//全局Library
-		if ($count == 0) {
+		$prefix = substr($classFile, 0, 3);
+		if ($prefix == "tea") {
 			$globalLibFile = TEA_LIBS . DS . $classFile;
-			if(file_exists($globalLibFile)) {
+			if (file_exists($globalLibFile)) {
 				require($globalLibFile);
 				return;
 			}
 		}
 
 		//应用类
-		$appFile = TEA_ROOT . DS . $classFile;
-		if (file_exists($appFile)) {
-			require($appFile);
-			return;
+		if ($prefix == "app") {
+			$appFile = TEA_ROOT . DS . $classFile;
+			if (file_exists($appFile)) {
+				require($appFile);
+				return;
+			}
+		}
+
+		//模块
+		if (preg_match("/^\\w+\\/app/", $classFile)) {
+			$moduleFile = TEA_ROOT . DS . "@" . $classFile;
+			if (file_exists($moduleFile)) {
+				require($moduleFile);
+				return;
+			}
 		}
 
 		//应用Library
-		if ($count == 0) {
-			$appLibFile = TEA_APP . "/libs/" . $classFile;
-			if(file_exists($appLibFile)) {
-				require($appLibFile);
-				return;
-			}
+		$appLibFile = TEA_APP . "/libs/" . $classFile;
+		if(file_exists($appLibFile)) {
+			require($appLibFile);
+			return;
 		}
 
 		//插件和其他

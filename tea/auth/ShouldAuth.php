@@ -4,6 +4,7 @@ namespace tea\auth;
 
 class ShouldAuth {
 	private $_ns;
+	private $_failFn;
 
 	public static function newForParam($param) {
 		session_init();
@@ -62,6 +63,11 @@ class ShouldAuth {
 		unset($_SESSION[$this->_ns]);
 	}
 
+	public function ifFail(callable $fn) {
+		$this->_failFn = $fn;
+		return $this;
+	}
+
 	/**
 	 * 校验，供子类覆盖实现
 	 *
@@ -75,7 +81,9 @@ class ShouldAuth {
 	 * 失败时调用，供子类覆盖实现
 	 */
 	public function onFail() {
-
+		if ($this->_failFn) {
+			call_user_func($this->_failFn, $this);
+		}
 	}
 }
 

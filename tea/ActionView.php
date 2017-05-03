@@ -2,6 +2,8 @@
 
 namespace tea;
 
+use tea\tpl\Parser;
+
 class ActionView {
 	private $_action;
 
@@ -21,19 +23,26 @@ class ActionView {
 		$viewName = $this->_action->view();
 		$name = $this->_action->name();
 		$parent = $this->_action->parent();
+		$moduleDir = $this->_action->moduleDir();
+
 		$view = (strlen($viewName) == 0) ? $name : $viewName;
-		$viewFile = TEA_APP . "/views" . $parent . "/" . $view . ".php";
+
+		$viewFile = $moduleDir . "/views" . $parent . "/" . $view . ".php";
 
 		if (!is_file($viewFile)) {
 			return;
 		}
 
-
-		//注入资源
-
-
-		extract((array)$this->_action->data);
-		require $viewFile;
+		//分析模板
+		$data = (array)$this->_action->data;
+		if (class_exists("tea\\tpl\\Parser")) {
+			$parser = new Parser();
+			$parser->parse($viewFile, $data);
+		}
+		else {
+			extract($data);
+			require $viewFile;
+		}
 	}
 }
 

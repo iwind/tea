@@ -2,9 +2,7 @@
 
 namespace tea\auth;
 
-use tea\ActionResultException;
-
-class Exception extends ActionResultException {
+class Exception extends \tea\Exception {
 
 }
 

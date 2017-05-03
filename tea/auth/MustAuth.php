@@ -12,6 +12,7 @@ class MustAuth extends ShouldAuth {
 
 			throw new Exception("You should authenticate first");
 		}
+
 		return $auth;
 	}
 }

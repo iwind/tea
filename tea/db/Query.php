@@ -3,6 +3,7 @@
 namespace tea\db;
 
 use tea\Arrays;
+use tea\page\Page;
 
 /**
  * 查询构造对象
@@ -249,8 +250,8 @@ class Query {
 	/**
 	 * 设置数据表
 	 *
-	 * @param $table 数据表
-	 * @return 当前对象
+	 * @param string $table 数据表
+	 * @return $this 当前对象
 	 */
 	public function table($table) {
 		$this->_table = $table;
@@ -736,7 +737,7 @@ class Query {
 	 * @param \tea\page\Page $page 分页对象
 	 * @return $this
 	 */
-	public function page(\tea\page\Page $page) {
+	public function page(Page $page) {
 		$this->_limit = $page->size();
 		$this->_offset = $page->offset();
 		return $this;
@@ -817,7 +818,7 @@ class Query {
 		if (is_int($callback)) {
 			$index = $callback;
 			$this->_map = function ($row) use ($index) {
-				$values = array_values(pp_normalize($row, false));
+				$values = array_values(normalize($row, false));
 				$i = 0;
 				foreach ($values as $index2 => $value) {
 					if (!is_null($value)) {

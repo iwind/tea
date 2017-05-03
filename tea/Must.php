@@ -6,6 +6,10 @@ class Must {
 	private static $_instance;
 	private $_shouldThrow = false;
 
+	private $_field;
+	private $_value;
+	private $_message;
+
 	public static function new () {
 		return self::shared();
 	}
@@ -19,6 +23,17 @@ class Must {
 
 	private function __construct() {
 		$this->_shouldThrow = (get_called_class() == self::class);
+	}
+
+	public function field($field = nil, $value = nil) {
+		if (is_nil($field)) {
+			return $this->_field;
+		}
+		else {
+			$this->_field = $field;
+			$this->_value = $value;
+			return $this;
+		}
 	}
 
 	public function int(&$var, $min = null, $max = null) {
@@ -122,9 +137,39 @@ class Must {
 		return $this;
 	}
 
-	private function _throw() {
+	public function minLength($min, $message) {
+		if (mb_strlen($this->_value, "UTF-8") < $min) {
+			$this->_throw($message);
+		}
+		return $this;
+	}
+
+	public function maxLength($max, $message) {
+		if (mb_strlen($this->_value, "UTF-8") > $max) {
+			$this->_throw($message);
+		}
+		return $this;
+	}
+
+	/**
+	 * 检查是否符合Email规则
+	 */
+	public function email($message) {
+		$regex = "/^[a-z0-9]+([\\._\\-\\+]*[a-z0-9]+)*@([a-z0-9]+[\\-a-z0-9]*[a-z0-9]+\\.)+[a-z0-9]+$/i";
+		if (!preg_match($regex, $this->_value)) {
+			$this->_throw($message);
+		}
+		return $this;
+	}
+
+	private function _throw($message = null) {
+		if (is_null($message)) {
+			$message = "found a wrong param value";
+		}
 		if ($this->_shouldThrow) {
-			throw new Exception("found a wrong param value");
+			$e = new Exception($message);
+			$e->setCause($this);
+			throw $e;
 		}
 	}
 }

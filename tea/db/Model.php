@@ -190,7 +190,7 @@ class Model extends \stdClass implements \ArrayAccess {
 		$table = static::$TABLE;
 		if (is_array($table)) {
 			array_walk($table, function (&$_table) {
-				if (strstr($_table, '$')) {
+				if (strstr($_table, '%')) {
 					$config = o(":db.default");
 					foreach ($config as $key => $value) {
 						if (is_scalar($value)) {
@@ -201,7 +201,7 @@ class Model extends \stdClass implements \ArrayAccess {
 			});
 			return $table;
 		}
-		if (strstr($table, '$')) {
+		if (strstr($table, '%')) {
 			$config = o(":db.default");
 			foreach ($config as $key => $value) {
 				if (is_scalar($value)) {

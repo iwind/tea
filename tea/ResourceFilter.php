@@ -119,6 +119,7 @@ class ResourceFilter extends Filter  {
 
 	public function before(&$object) {
 		$path = TEA_APP . "/views/" . $object;
+		$path = preg_replace("/\\?.+/", "", $path);
 		$ext = trim(strtolower(pathinfo($path, PATHINFO_EXTENSION)));
 		if (in_array($ext, [ "php" ])) {
 			Tea::shared()->stop();
@@ -127,6 +128,11 @@ class ResourceFilter extends Filter  {
 		if (isset(self::$_mimeTypes[$ext])) {
 			header("Content-Type:" . self::$_mimeTypes[$ext]);
 		}
+
+		$life = 86400 * 30;
+
+		header_remove("Pragma");
+		header("Cache-Control: max-age={$life}");
 
 		if (is_file($path)) {
 			readfile($path);

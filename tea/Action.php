@@ -3,11 +3,18 @@
 namespace tea;
 
 abstract class Action {
+	private static $_currentAction;
+
+	/**
+	 * @var \stdClass
+	 */
 	public $data;
 
 	private $_directive;
 	private $_view = "index";
 	private $_name;
+	private $_module;
+	private $_moduleDir;
 	private $_parent;
 	private $_output = true;
 	private $_params = [];
@@ -15,8 +22,10 @@ abstract class Action {
 		"code" => 500,
 		"message" => null,
 		"data" => null,
-		"next" => null
+		"next" => null,
+		"errors" => []
 	];
+	private $_errors = []; /* [ $field => [ [ rule1, error1 ], ... ] ], ] */
 
 	public function __construct() {
 		$this->data = new \stdClass();
@@ -39,6 +48,12 @@ abstract class Action {
 		return $this;
 	}
 
+	/**
+	 * 设置参数
+	 *
+	 * @param array $params 参数集
+	 * @return $this
+	 */
 	public function params(array $params) {
 		$this->_params = $params;
 		return $this;
@@ -54,6 +69,22 @@ abstract class Action {
 			return $this->_parent;
 		}
 		$this->_parent = $parent;
+		return $this;
+	}
+
+	public function module($module = nil) {
+		if (is_nil($module)) {
+			return $this->_module;
+		}
+		$this->_module = $module;
+		return $this;
+	}
+
+	public function moduleDir($dir = nil) {
+		if (is_nil($dir)) {
+			return $this->_moduleDir;
+		}
+		$this->_moduleDir = $dir;
 		return $this;
 	}
 
@@ -83,6 +114,45 @@ abstract class Action {
 		return $this;
 	}
 
+	private function _addError($attr, $rule, $message) {
+		if (!isset($this->_errors[$attr])) {
+			$this->_errors[$attr] = [];
+		}
+		$this->_errors[$attr][] = [ $attr, $rule, $message ];
+
+		return $this;
+	}
+
+	/**
+	 * 对某个参数添加错误信息
+	 *
+	 * @param string $attr 参数名
+	 * @param string $message 错误信息
+	 * @return $this
+	 */
+	public function field($attr, $message) {
+		$this->_addError($attr, "validate", $message);
+		return $this;
+	}
+
+	/**
+	 * 取得所有错误的集合
+	 *
+	 * @return array
+	 */
+	public function errors() {
+		return $this->_errors;
+	}
+
+	/**
+	 * 判断是否有错误发生
+	 *
+	 * @return bool
+	 */
+	public function hasErrors() {
+		return !empty($this->_errors);
+	}
+
 	public function success($message = null) {
 		$this->code(200)->fail($message);
 	}
@@ -96,12 +166,15 @@ abstract class Action {
 	public function fail($message = null) {
 		$this->after();
 
+		if ($this->hasErrors()) {
+			$this->_response["errors"] = array_values($this->_errors);
+		}
+
 		if ($this->_directive == "json") {
 			if ($this->_output) {
 				header("Content-Type: application/json");
 			}
 
-			$this->_response["code"] = 200;
 			$this->_response["message"] = $message;
 			$this->_response["data"] = $this->data;
 
@@ -122,7 +195,6 @@ abstract class Action {
 				header("Content-Type: application/json");
 			}
 
-			$this->_response["code"] = 200;
 			$this->_response["message"] = $message;
 			$this->_response["data"] = $this->data;
 
@@ -415,7 +487,20 @@ FOOTER;
 		if ($action == "/") {
 			$action = "/index/index";
 		}
+
 		$pieces = explode("/", $action);
+
+		//是否为模块
+		$module = "";
+		if (substr($pieces[1], 0, 1) == "@") {
+			$module = substr($pieces[1], 1);
+
+			unset($pieces[1]);
+			if (count($pieces) == 1) {
+				$pieces[] = "index";
+			}
+		}
+
 		if (count($pieces) == 2) {
 			$pieces[] = "index";
 		}
@@ -423,14 +508,20 @@ FOOTER;
 		$parentActionName = implode("/", $pieces);
 
 		$actionClassName = ucfirst($actionName) . "Action";
-		$actionPath = TEA_APP . "/actions" . $parentActionName . "/{$actionClassName}.php";
+		$moduleDir = is_empty($module) ? TEA_APP : dirname(TEA_APP) . DS . "@" . $module . DS . "app";
+		$actionPath = $moduleDir . DS . "actions" . $parentActionName . DS . "{$actionClassName}.php";
 		if (!is_file($actionPath)) {
 			throw new Exception("can not find action class file '{$actionPath}'");
 		}
 		require_once $actionPath;
-		$actionClass = "app\\actions" . str_replace("/", "\\", $parentActionName . "/" . $actionClassName);
+
+		$ns = is_empty($module) ? "" : $module . "\\";
+		$actionClass = $ns . "app\\actions" . str_replace("/", "\\", $parentActionName . "/" . $actionClassName);
 		$reflectionClass = new \ReflectionClass($actionClass);
-		/** @var Action $actionObject */
+
+		/**
+		 * @var Action $actionObject
+		 */
 		$actionObject = $reflectionClass->newInstance();
 
 		$oldRequestMethod = $_SERVER["REQUEST_METHOD"];
@@ -438,21 +529,54 @@ FOOTER;
 			if ($return) {
 				$_SERVER["REQUEST_METHOD"] = "POST";
 			}
+
+			self::$_currentAction = $actionObject;
+
 			$actionObject->parent($parentActionName)
 				->directive($directive)
 				->name($actionName)
 				->view($actionName)
 				->output(!$return)
 				->params(is_array($params) ? $params : [])
+				->module($module)
+				->moduleDir($moduleDir)
 				->invoke();
 		} catch (ActionResultException $e) {
 			$_SERVER["REQUEST_METHOD"] = $oldRequestMethod;
 			return $e->data();
+		} catch (Exception $e) {
+			//处理特殊异常
+			$hasFiltered = false;
+			if ($e->cause()) {
+				$cause = $e->cause();
+				if ($cause instanceof Must) {
+					$hasFiltered = true;
+
+					try {
+						$actionObject->_addError($cause->field(), "validate", $e->getMessage())->fail();
+					} catch (ActionResultException $e) {
+						$_SERVER["REQUEST_METHOD"] = $oldRequestMethod;
+						return $e->data();
+					}
+				}
+			}
+			if (!$hasFiltered) {
+				throw $e;
+			}
 		}
 	}
 
 	public static function callAction($path, array $params = []) {
 		return self::runAction($path, null, true, $params);
+	}
+
+	/**
+	 * 取得当前正在执行的Action
+	 *
+	 * @return self
+	 */
+	public static function currentAction() {
+		return self::$_currentAction;
 	}
 }
 

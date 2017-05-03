@@ -35,6 +35,10 @@ namespace tea {
 	 */
 	define("TEA_APP", TEA_ROOT . DS . "app");
 
+	if (!defined("TEA_PUBLIC")) {
+		define("TEA_PUBLIC", TEA_APP . DS . "public");
+	}
+
 	/**
 	 * Tea类库所在路径
 	 */
@@ -91,6 +95,13 @@ namespace tea {
 	 */
 	if (!defined("TEA_URL_DISPATCHER")) {
 		define("TEA_URL_DISPATCHER", "");
+	}
+
+	/**
+	 * 是否允许在参数中设置ACTION路径
+	 */
+	if (!defined("TEA_ENABLE_ACTION_PARAM")) {
+		define("TEA_ENABLE_ACTION_PARAM", false);
 	}
 
 	/**

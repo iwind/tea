@@ -136,6 +136,9 @@ class GenerateJob extends Job {
 				if (in_array($field->name(), [ "state" ])) {
 					$fieldDesc .= "\n\t/**\n\t * " . $field->comment() . "\n\t *\n\t * @var int\n\t */\n";
 				}
+				else {
+					$fieldDesc .= "\n\t/**\n\t * " . $field->comment() . "\n\t */\n";
+				}
 				$fieldDesc .= "\t" . "public \$" . $field->name() . ";";;
 
 				$fields[] = $fieldDesc;
@@ -231,7 +234,7 @@ METHOD;
 		$template = <<<TEMPLATE
 <?php
 
-namespace mvc\models{$ns};
+namespace app\models{$ns};
 
 use \\tea\db\Model;
 
