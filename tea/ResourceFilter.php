@@ -118,7 +118,15 @@ class ResourceFilter extends Filter  {
 	}
 
 	public function before(&$object) {
-		$path = TEA_APP . "/views/" . $object;
+		//处理模块
+		if (preg_match("{^/?(@\\w+)/(.+)}", $object, $match)) {
+			$path = TEA_ROOT . DS . $match[1] . DS . "app" . DS . "views" . DS . $match[2];
+		}
+		else {
+			$path = TEA_APP . DS . "views" . DS . $object;
+		}
+
+		//检查扩展名和mime type
 		$path = preg_replace("/\\?.+/", "", $path);
 		$ext = trim(strtolower(pathinfo($path, PATHINFO_EXTENSION)));
 		if (in_array($ext, [ "php" ])) {
@@ -129,6 +137,7 @@ class ResourceFilter extends Filter  {
 			header("Content-Type:" . self::$_mimeTypes[$ext]);
 		}
 
+		//输出
 		$life = 86400 * 30;
 
 		header_remove("Pragma");

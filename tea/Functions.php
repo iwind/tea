@@ -170,7 +170,7 @@ namespace {
 	 * @return string
 	 */
 	function u($action, array $params = [], $hash = null, $isResource = false) {
-		$module = defined("TEA_MODULE") ? TEA_MODULE : "";
+		$module = Action::currentAction()->module();
 
 		if (substr($action, 0, 2) === "..") {
 			$controller = Action::currentAction()->parent();
@@ -188,7 +188,7 @@ namespace {
 		else if (substr($action, 0, 1) == ".") {
 			$action = Action::currentAction()->parent() . $action;
 			if ($module != "") {
-				$action = "@" . $module . "." . $action;
+				$action = "@" . $module . "/" . ltrim($action, "/");
 			}
 		}
 		else if ($module != "") {
@@ -513,7 +513,7 @@ namespace {
 						break;
 					case "string":
 						$value = strval($value);
-						$value = htmlspecialchars(trim($value));
+						$value = trim($value);
 						break;
 					case "bool":
 						$value = boolval($value);

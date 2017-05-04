@@ -151,6 +151,20 @@ class Must {
 		return $this;
 	}
 
+	public function require($message) {
+		if (is_empty($this->_value)) {
+			$this->_throw($message);
+		}
+		return $this;
+	}
+
+	public function equal($value, $message) {
+		if ($value !== $this->_value) {
+			$this->_throw($message);
+		}
+		return $this;
+	}
+
 	/**
 	 * 检查是否符合Email规则
 	 */
