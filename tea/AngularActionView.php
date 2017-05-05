@@ -34,7 +34,7 @@ class AngularActionView extends ActionView {
 			$css = "\n<link type=\"text/css\" rel=\"stylesheet\" href=\"" . u("__resource__{$realParent}") . "/{$viewName}.css?v={$version}\"/>";
 		}
 
-		$json = htmlspecialchars_decode(json_encode($data));
+		$json = json_encode($data);
 		$data->tea = (object)[
 			"inject" => "<script type=\"text/javascript\">\n window.TEA = { 
 	\"ACTION\": {
