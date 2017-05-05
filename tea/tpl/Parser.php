@@ -174,7 +174,7 @@ class Parser {
 			};
 		}
 		else {
-			$__data["pp__xn"] = $__data["xn"];
+			$__data["tea__xn"] = $__data["xn"];
 		}
 
 		extract($__data);

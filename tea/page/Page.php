@@ -2,32 +2,32 @@
 
 namespace tea\page;
 
+use tea\Arrays;
 use tea\Request;
 
 /**
  * 分页类
  *
  * <code>
- * $pager = new Page();
- * $pager->total(100);
- * $pager->setSize(21);
- * $pager->setKeyword("page");
- * $pager->setPath("pager.php");
- * $pager->setQuery("a=b&pager=%{PAGE_NO}&d=1");
- * echo $pager;
- * echo "offset:" . $pager->offset();
+ * $page = new Page();
+ * $page->total(100);
+ * $page->size(21);
+ * $page->keyword("page");
+ * $page->path("pager.php");
+ * $page->query("a=b&pager=%{PAGE_NO}&d=1");
+ * echo $page;
+ * echo "offset:" . $page->offset();
  * </code>
  *
  */
 class Page {
-	private $keyword;
+	private $_keyword;
 	private $_total;
-	private $path;
-	private $size;
-	private $properties;
-	private $query;
-	private $pageSetSize = 11;
-	private $rows = [];
+	private $_path;
+	private $_size;
+	private $_query;
+	private $_pageSetSize = 11;
+	private $_rows = [];
 	
 	/**
 	 * 分页中代码当前页码的常量
@@ -42,10 +42,10 @@ class Page {
 	 */
 	public function __construct() {
 		if (isset($_SERVER["REDIRECT_URL"])) {
-			$this->path = $_SERVER["REDIRECT_URL"];
+			$this->_path = $_SERVER["REDIRECT_URL"];
 		}
 		else {
-			$this->path = $_SERVER["PHP_SELF"];
+			$this->_path = $_SERVER["PHP_SELF"];
 		}
 	}
 	
@@ -101,150 +101,107 @@ class Page {
 	}
 	
 	/**
-	 * 设置内容总数
+	 * 取得或设置数据总数
 	 *
-	 * @param integer $total 内容总数
-	 * @return Page
-	 * @throws \Exception
+	 * @param int|string $total 总数
+	 * @return integer|$this
+	 * @throws
 	 */
-	public function setTotal($total) {
-		$this->_total =  intval($total);
-		if ($this->_total < 0) {
-			throw new \Exception("content total '{$total}' can't be small than 0");
+	public function total($total = nil) {
+		if (!is_nil($total)) {
+			$this->_total =  intval($total);
+			if ($this->_total < 0) {
+				throw new \Exception("content total '{$total}' can't be small than 0");
+			}
+			return $this;
 		}
-		return $this;
-	}
-	
-	/**
-	 * 数据总数
-	 *
-	 * @return integer
-	 * @since 1.0
-	 */
-	public function total() {
 		return $this->_total;
 	}
 	
 	/**
-	 * 设置分页链接中的关键字
+	 * 取得或设置分页用的关键字
+	 *
+	 * 如果没有关键字，则默认为page
 	 *
 	 * @param string $keyword 关键字
-	 * @return Page
+	 * @return string|self
 	 */
-	public function setKeyword($keyword) {
-		$this->keyword = $keyword;
-		return $this;
-	}
-	
-	/**
-	 * 取得分页用的关键字
-	 *
-	 * 从1.0开始，如果没有关键字，则默认为page
-	 * 
-	 * @return string
-	 */
-	public function keyword() {
-		if (!$this->keyword) {
-			$this->keyword = "page";
+	public function keyword($keyword = nil) {
+		if (!is_nil($keyword)) {
+			$this->_keyword = $keyword;
+			return $this;
 		}
-		return $this->keyword;
+		if (!$this->_keyword) {
+			$this->_keyword = "page";
+		}
+		return $this->_keyword;
 	}
 	
 	/**
-	 * 设置每页记录数
+	 * 设置或取得每页记录数
 	 *
-	 * @param integer $size 大于0的数字
-	 * @return Page
+	 * @param integer|string $size 大于0的数字
+	 * @return int|self
 	 * @throws \Exception
 	 */
-	public function setSize($size) {
-		$this->size = intval($size);
-		if ($this->size < 1) {
-			throw new \Exception("page size '{$size}' can't be small than 1");
+	public function size($size = nil) {
+		if (!is_nil($size)) {
+			$this->_size = intval($size);
+			if ($this->_size < 1) {
+				throw new \Exception("page size '{$size}' can't be small than 1");
+			}
+			return $this;
 		}
-		return $this;
+
+		if ($this->_size < 1) {
+			$this->_size = 10;
+		}
+		return $this->_size;
 	}
 	
 	/**
-	 * 取得每页记录数
-	 *
-	 * @return integer
-	 */
-	public function size() {
-		if ($this->size < 1) {
-			$this->size = 10;
-		}
-		return $this->size;
-	}
-	
-	/**
-	 * 设置链接的路径
+	 * 设置或取得链接的路径
 	 *
 	 * @param string $path 路径
-	 * @return Page
+	 * @return self
 	 */
-	public function setPath($path) {
-		$this->path = $path;
-		return $this;
-	}
-	
-	/**
-	 * 取得程序路径
-	 *
-	 * @return string
-	 * @since 1.0
-	 */
-	public function path() {
-		return $this->path;
-	}
-	
-	/**
-	 * 设置属性
-	 *
-	 * @param array $properties 属性列表
-	 * @return Page
-	 */
-	public function setProperties(array $properties) {
-		$this->properties = $properties;
-		return $this;
-	}
-	
-	/**
-	 * 取得设置的属性
-	 *
-	 * @return array
-	 * @since 1.0
-	 */
-	public function properties() {
-		return $this->properties;
+	public function path($path = nil) {
+		if (!is_nil($path)) {
+			$this->_path = $path;
+			return $this;
+		}
+		return $this->_path;
 	}
 	
 	/**
 	 * 设置查询
 	 *
 	 * @param mixed $query string|array
-	 * @return Page
+	 * @return self
 	 */
-	public function setQuery($query) {
-		if (is_array($query)) {
-			$_query = [];
-			foreach ($query as $key => $value) {
-				if ($key == $this->keyword()) {
-					continue;
-				}
-				if (is_array($value)) {
-					foreach ($value as $key1=>$value1) {
-						$_query[] = "{$key}[]=" . urlencode($value1);
+	public function query($query = nil) {
+		if (!is_nil($query)) {
+			if (is_array($query)) {
+				$_query = [];
+				foreach ($query as $key => $value) {
+					if ($key == $this->keyword()) {
+						continue;
+					}
+					if (is_array($value)) {
+						foreach ($value as $key1 => $value1) {
+							$_query[] = "{$key}[]=" . urlencode($value1);
+						}
+					}
+					else {
+						$_query[] = "{$key}=" . urlencode($value);
 					}
 				}
-				else {
-					$_query[] = "{$key}=" . urlencode($value);
-				}
+				$query = implode("&", $_query);
 			}
-			$query = implode("&", $_query);
+			$this->_query = $query;
+			return $this;
 		}
-		$this->query = $query;
-		return $this;
+		return $this->_query;
 	}
 	
 	/**
@@ -259,7 +216,7 @@ class Page {
 	 * </code>
 	 *
 	 * @param mixed $query string|array
-	 * @return Page
+	 * @return self
 	 * @since 1.0
 	 */
 	public function addQuery($query) {
@@ -280,7 +237,7 @@ class Page {
 			}
 			$query = implode("&", $_query);
 		}
-		$this->query .= ($this->query ? "&" : "") . $query;
+		$this->_query .= ($this->_query ? "&" : "") . $query;
 		return $this;
 	}
 	
@@ -290,33 +247,22 @@ class Page {
 	 * @param boolean $bool 是否开启该功能
 	 * @param string|array $except 要去除的参数名
 	 * @param string|array $only 限制的参数名
-	 * @return Page
-	 * @since 1.0
+	 * @return self
 	 */
-	public function setAutoQuery($bool = true, $except = "", $only = "") {
+	public function autoQuery($bool = true, $except = "", $only = "") {
 		if ($bool) {
 			$x = Request::shared()->params();
 			foreach ($x as $name => $value) {
-				if ($except && \tea\Arrays::in($name, $except)) {
+				if ($except && Arrays::in($name, $except)) {
 					unset($x[$name]);
 				}
-				if ($only && !\tea\Arrays::in($name, $only)) {
+				if ($only && !Arrays::in($name, $only)) {
 					unset($x[$name]);
 				}
 			}
-			$this->setQuery($x);
+			$this->query($x);
 		}
 		return $this;
-	}
-	
-	/**
-	 * 取得查询
-	 *
-	 * @return array
-	 * @since 1.0
-	 */
-	public function query() {
-		return $this->query;
 	}
 	
 	/**
@@ -359,10 +305,10 @@ class Page {
 	 * 添加记录
 	 *
 	 * @param mixed $row 记录
-	 * @return Page
+	 * @return self
 	 */
 	public function addRow($row) {
-		$this->rows[] = $row;
+		$this->_rows[] = $row;
 		return $this;
 	}
 	
@@ -370,61 +316,49 @@ class Page {
 	 * 添加记录集
 	 *
 	 * @param array $rows 记录集
-	 * @return Page
+	 * @return self
 	 */
 	public function addRows(array $rows) {
 		foreach ($rows as $row) {
-			$this->rows[] = $row;
+			$this->_rows[] = $row;
 		}
 		return $this;
 	}
 	
 	/**
-	 * 取得记录集
+	 * 设置或取得记录集
 	 *
-	 * @return array
+	 * @param array|string $rows 记录集
+	 * @return self
 	 */
-	public function rows() {
-		return $this->rows;
-	}
-	
-	/**
-	 * 设置记录集
-	 *
-	 * @param array $rows 记录集
-	 * @return Page
-	 */
-	public function setRows($rows) {
-		$this->rows = $rows;
+	public function rows($rows = nil) {
+		if (!is_nil($rows)) {
+			$this->_rows = $rows;
+			return $this;
+		}
+		$this->_rows = $rows;
 		return $this;
 	}
 	
 	/**
-	 * 设置分页集尺寸
+	 * 设置或取得分页集尺寸
 	 *
-	 * @param integer $num 大于1
-	 * @return Page
-	 * @since 1.0
+	 * @param integer|string $num 大于1
+	 * @return int|self
 	 */
-	public function setPageSetNum($num){
-		$this->pageSetSize = $num;
-		return $this;
+	public function pageSetNum($num = nil){
+		if (!is_nil($num)) {
+			$this->_pageSetSize = $num;
+			return $this;
+		}
+		return $this->_pageSetSize;
 	}
 	
-	/**
-	 * 取得分页集尺寸
-	 *
-	 * @return integer
-	 * @since 1.0
-	 */
-	public function pageSetNum(){
-		return $this->pageSetSize;
-	}
-
 	public function __get($prop) {
 		if (method_exists($this, $prop)) {
 			return $this->$prop();
 		}
+		return "";
 	}
 
 	public function info() {

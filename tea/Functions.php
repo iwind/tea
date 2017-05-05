@@ -449,6 +449,17 @@ namespace {
 		return "";
 	}
 
+	/**
+	 * 计算两个经纬度的距离（以米计）
+	 *
+	 * 如果为-1，表示经纬度输入错误
+	 *
+	 * @param double $lat1 维度
+	 * @param double $lng1 经度
+	 * @param double $lat2 维度
+	 * @param double $lng2 经度
+	 * @return int
+	 */
 	function distance($lat1, $lng1, $lat2, $lng2) {
 		if ($lat1 == 0 || $lng1 == 0 || $lat2 == 0 || $lng2 == 0) {
 			return -1;

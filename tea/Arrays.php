@@ -255,16 +255,16 @@ class Arrays {
 	}
 
 	/**
-	 * 扁平化数组
+	 * 扁平化数组或对象
 	 *
-	 * @param array $array 要操作的数组
+	 * @param array|object $array 要操作的数组
 	 * @param string $prefix 键前缀
 	 * @param array $results 要返回的结果
 	 * @return array
 	 */
-	public static function flatten(array $array, $prefix = null, &$results = []) {
+	public static function flatten($array, $prefix = null, &$results = []) {
 		foreach ($array as $key => $value) {
-			if (is_array($value)) {
+			if (is_array($value) || is_object($value)) {
 				self::flatten($value, $key, $results);
 			}
 			else {

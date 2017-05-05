@@ -1857,7 +1857,7 @@ class Query {
 	 * 清除缓存
 	 */
 	public function purge() {
-		if (!$this->_cache["enabled"] || pp_is_empty($this->_cache["key"])) {
+		if (!$this->_cache["enabled"] || is_empty($this->_cache["key"])) {
 			return;
 		}
 
