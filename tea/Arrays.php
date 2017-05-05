@@ -253,6 +253,29 @@ class Arrays {
 		}
 		return $numbers;
 	}
+
+	/**
+	 * 扁平化数组
+	 *
+	 * @param array $array 要操作的数组
+	 * @param string $prefix 键前缀
+	 * @param array $results 要返回的结果
+	 * @return array
+	 */
+	public static function flatten(array $array, $prefix = null, &$results = []) {
+		foreach ($array as $key => $value) {
+			if (is_array($value)) {
+				self::flatten($value, $key, $results);
+			}
+			else {
+				if (!is_null($prefix)) {
+					$key = $prefix . "." . $key;
+				}
+				$results[$key] = $value;
+			}
+		}
+		return $results;
+	}
 }
 
 ?>
