@@ -278,7 +278,7 @@ namespace {
 	 * @return bool
 	 */
 	function is_nil($var) {
-		return $var === nil;
+		return ($var === nil) || ($var === NilArray);
 	}
 
 	/**

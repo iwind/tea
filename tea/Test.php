@@ -67,11 +67,11 @@ class Test {
 	 * 安装测试用例时候调用
 	 *
 	 */
-	public function onSetup() {
+	public function before() {
 
 	}
 
-	public function onTeardown() {
+	public function after() {
 
 	}
 

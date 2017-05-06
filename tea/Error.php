@@ -197,7 +197,7 @@ EXCEPTION;
 			echo <<< EXCEPTION
 								<table cellpadding="0" cellspacing="0">
 									<tr>
-										<td width="70">Message</td>
+										<td width="70" style="vertical-align: top">Message</td>
 										<td class="message">[{$class}] {$message}</td>
 									</tr>
 EXCEPTION;
@@ -206,7 +206,7 @@ EXCEPTION;
 			echo <<< EXCEPTION
 								<table cellpadding="0" cellspacing="0">
 									<tr>
-										<td width="70">Message</td>
+										<td width="70" style="vertical-align: top">Message</td>
 										<td class="message">[PHP] {$message}</td>
 									</tr>
 EXCEPTION;

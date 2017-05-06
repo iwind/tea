@@ -126,7 +126,7 @@ class TestManager {
 					$obj = null;
 					if (!isset($loadedObjs[$className])) {
 						$obj = new $className;
-						$obj->onSetup();
+						$obj->before();
 						$loadedObjs[$className] = $obj;
 					}
 					else {
@@ -145,7 +145,7 @@ class TestManager {
 							"cost" => round($cost, 6)
 						));
 					}
-					catch (Exception $e) {
+					catch (TestException $e) {
 						$cost = microtime(true) - $microtime;
 						$this->_addFalse(array(
 							"class" => get_class($obj),
@@ -174,7 +174,7 @@ class TestManager {
 
 		}
 		foreach ($loadedObjs as $obj) {
-			$obj->onTeardown();
+			$obj->after();
 		}
 		closedir($handler);
 	}
