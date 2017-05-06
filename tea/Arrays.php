@@ -13,14 +13,15 @@ class Arrays {
 	 * @see Arrays::set
 	 */
 	public static function get($array, $keys, $default = null) {
-		if (is_object($array) && !($array instanceof \ArrayAccess)) {
-			$array = get_object_vars($array);
-		}
 		if (is_array($keys) && empty($keys)) {
 			return $array;
 		}
 		if (is_scalar($keys) && strlen($keys) == 0) {
 			return $array;
+		}
+		$isObject = is_object($array);
+		if ($array instanceof \ArrayAccess) {
+			$isObject = false;
 		}
 		if (!is_array($keys)) {
 			if (strstr($keys, "`")) {
@@ -28,24 +29,26 @@ class Arrays {
 			}
 			$keys = preg_split("/(?<!\\\\)\\./", $keys);
 		}
-		if (count($keys) == 1) {
-			$firstKey = array_pop($keys);
-			$firstKey = str_replace("\\.", ".", $firstKey);
-			return array_key_exists($firstKey, $array) ? $array[$firstKey] : $default;
+
+		$firstKey = array_shift($keys);
+		$value = null;
+		if ($isObject) {
+			$properties = get_object_vars($array);
+			$value = array_key_exists($firstKey, $properties) ? $array->$firstKey :  $default;
 		}
-		$lastKey = array_pop($keys);
-		$lastKey = str_replace("\\.", ".", $lastKey);
-		$lastArray = $array;
-		foreach ($keys as $key) {
-			$key = str_replace("\\.", ".", $key);
-			if (is_array($lastArray) && array_key_exists($key, $lastArray)) {
-				$lastArray = $lastArray[$key];
-			} else {
-				return $default;
-			}
+		else {
+			$value = array_key_exists($firstKey, $array) ? $array[$firstKey] : $default;
 		}
 
-		return (is_array($lastArray) && array_key_exists($lastKey, $lastArray)) ? $lastArray[$lastKey] : $default;
+		if (empty($keys)) {
+			return $value;
+		}
+
+		if (is_array($value) || is_object($value)) {
+			return self::get($value, $keys, $default);
+		}
+
+		return null;
 	}
 
 	/**

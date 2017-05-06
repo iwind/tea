@@ -39,6 +39,9 @@ class Request {
 		return $this->_params;
 	}
 
+	public function isAjax() {
+		return (isset($_SERVER["HTTP_X_REQUESTED_WITH"]) && $_SERVER["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest");
+	}
 }
 
 ?>
