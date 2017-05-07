@@ -2,6 +2,7 @@
 
 namespace tea\tpl;
 
+use tea\Action;
 use tea\Exception;
 use tea\string\Helper;
 
@@ -387,14 +388,24 @@ PHP;
 		}, $contents);
 
 		//{tea:css}
-		$contents = preg_replace_callback("/\\{[ \t]*tea:css\\s+(\\S+)[ \t]*\\}/", function ($match) {
+		$contents = preg_replace_callback("/\\{[ \t]*tea\\s*:\\s*css\\s+(\\S+)[ \t]*\\}/", function ($match) {
 			$path = $match[1];
 
 			//是否为资源
-			$isResource = preg_match("{^/__resource__(/.+)$}", $path, $match2);
+			$isResource = preg_match("{^/__resource__(/@\\w*)?(/.+)$}", $path, $match2);
 
 			if ($isResource) {
-				$file = TEA_APP . DS . "views" . $match2[1];
+				if (!is_empty($match2[1])) {
+					if ($match2[1] == "/@") {
+						$match2[1] = "/@" . Action::currentAction()->module();
+						$path = str_replace("/@/", $match2[1] . "/", $path);
+					}
+
+					$file = TEA_ROOT . DS . ltrim($match2[1], "/") . DS . "app" . DS . "views" . $match2[2];
+				}
+				else {
+					$file = TEA_APP . DS . "views" . $match2[2];
+				}
 				$path = u($path, [], null, true);
 				$pieces = explode("?", $path, 2);
 			}
@@ -421,14 +432,24 @@ PHP;
 		}, $contents);
 
 		//{tea:js}
-		$contents = preg_replace_callback("/\\{[ \t]*tea:js\\s+(\\S+)[ \t]*\\}/", function ($match) {
+		$contents = preg_replace_callback("/\\{[ \t]*tea\\s*:\\s*js\\s+(\\S+)[ \t]*\\}/", function ($match) {
 			$path = $match[1];
 
 			//是否为资源
-			$isResource = preg_match("{^/__resource__(/.+)$}", $path, $match2);
+			$isResource = preg_match("{^/__resource__(/@\\w*)?(/.+)$}", $path, $match2);
 
 			if ($isResource) {
-				$file = TEA_APP . DS . "views" . $match2[1];
+				if (!is_empty($match2[1])) {
+					if ($match2[1] == "/@") {
+						$match2[1] = "/@" . Action::currentAction()->module();
+						$path = str_replace("/@/", $match2[1] . "/", $path);
+					}
+
+					$file = TEA_ROOT . DS . ltrim($match2[1], "/") . DS . "app" . DS . "views" . $match2[2];
+				}
+				else {
+					$file = TEA_APP . DS . "views" . $match2[2];
+				}
 				$path = u($path, [], null, true);
 				$pieces = explode("?", $path, 2);
 			}
@@ -436,6 +457,7 @@ PHP;
 				$pieces = explode("?", $path, 2);
 				$file = TEA_PUBLIC . DS . $pieces[0];
 			}
+
 			$version = "";
 			if (is_file($file)) {
 				if (TEA_ENV == "dev") {
@@ -454,15 +476,26 @@ PHP;
 			return '<script src="' . $path . '" type="text/javascript"></script>';
 		}, $contents);
 
-		//图片
-		$contents = preg_replace_callback("/\\{[ \t]*tea:resource\\s+(\\S+)[ \t]*\\}/", function ($match) {
+		//图片或其他资源
+		$contents = preg_replace_callback("/\\{[ \t]*tea\\s*:\\s*resource\\s+(\\S+)[ \t]*\\}/", function ($match) {
 			$path = $match[1];
 
 			//是否为资源
-			$isResource = preg_match("{^/__resource__(/.+)$}", $path, $match2);
+			//是否为资源
+			$isResource = preg_match("{^/__resource__(/@\\w*)?(/.+)$}", $path, $match2);
 
 			if ($isResource) {
-				$file = TEA_APP . DS . "views" . $match2[1];
+				if (!is_empty($match2[1])) {
+					if ($match2[1] == "/@") {
+						$match2[1] = "/@" . Action::currentAction()->module();
+						$path = str_replace("/@/", $match2[1] . "/", $path);
+					}
+
+					$file = TEA_ROOT . DS . ltrim($match2[1], "/") . DS . "app" . DS . "views" . $match2[2];
+				}
+				else {
+					$file = TEA_APP . DS . "views" . $match2[2];
+				}
 				$path = u($path, [], null, true);
 				$pieces = explode("?", $path, 2);
 			}
