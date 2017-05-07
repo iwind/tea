@@ -3,6 +3,7 @@
 namespace {
 
 	use tea\Action;
+	use tea\Request;
 
 	/**
 	 * 打印数据的内容
@@ -641,6 +642,46 @@ namespace {
 			}
 		}
 		return $vars;
+	}
+
+	/**
+	 * 获取参数值，并使用htmlspecialchars进行转换
+	 *
+	 * @param string $name 参数名
+	 * @return string
+	 */
+	function x($name) {
+		return htmlspecialchars(Request::shared()->param($name));
+	}
+
+	/**
+	 * 获取参数值
+	 *
+	 * @param string $name 参数名
+	 * @return string|null
+	 */
+	function xn($name) {
+		return Request::shared()->param($name);
+	}
+
+	/**
+	 * 获取参数的值，并转化为整数
+	 *
+	 * @param string $name 参数名
+	 * @param int $min 最小值
+	 * @param int $max 最大值
+	 * @return int
+	 * @see x
+	 */
+	function xi($name, $min = null, $max = null) {
+		$number = intval(xn($name), 10);
+		if (!is_null($min)) {
+			$number = max($number, $min);
+		}
+		if (!is_null($max)) {
+			$number = min($number, $max);
+		}
+		return $number;
 	}
 }
 

@@ -1,6 +1,7 @@
 <?php
 
 namespace tea\tpl;
+
 use tea\Exception;
 use tea\string\Helper;
 
@@ -233,7 +234,7 @@ class Parser {
 		}, $contents);
 
 		//变量 $x|$xn|$xi
-		$contents = preg_replace_callback("/\\{[ \t]*(?:\\\$(x|xn|xi)\\s*\\.\\s*(\\w+))[ \t]*\\}/", function ($match) {
+		$contents = preg_replace_callback("/\\{[ \t]*(?:tea\\s*:\\s*\\\$(x|xn|xi)\\s*\\.\\s*(\\w+))[ \t]*\\}/", function ($match) {
 			return '<?php echo ' . $match[1] . '("' . $match[2] . '"); ?>';
 		}, $contents);
 
