@@ -8,7 +8,7 @@ namespace tea\db;
  *
  * @package tea\db
  */
-class Exception extends \Exception {
+class Exception extends \tea\Exception {
 
 }
 
