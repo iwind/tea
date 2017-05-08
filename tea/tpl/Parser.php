@@ -20,11 +20,16 @@ class Parser {
 	const ACTION_BEFORE = "before";
 	const ACTION_AFTER = "after";
 
+	private $_dir;
+
 	/**
 	 * 构造器
 	 */
 	public function __construct() {
-
+		$this->_dir = TEA_ROOT . "/tmp";
+		if (!is_writable($this->_dir)) {
+			$this->_dir = sys_get_temp_dir() . "/TeaPHP";
+		}
 	}
 
 	/**
@@ -48,6 +53,21 @@ class Parser {
 	}
 
 	/**
+	 * 设置缓存路径
+	 *
+	 * @param string $dir 缓存路径
+	 * @return self | string
+	 */
+	public function dir($dir = nil) {
+		if (!is_nil($dir)) {
+			$this->_dir = $dir;
+			return $this;
+		}
+
+		return $this->_dir;
+	}
+
+	/**
 	 * 分析文件
 	 *
 	 * @param string $filename 文件名
@@ -66,7 +86,7 @@ class Parser {
 		$tplFile = null;
 		$canWrite = false;
 		if ($write) {
-			$tplFile = TEA_ROOT . "/tmp/tpl/tpl-" . sprintf("%u", crc32($filename . "@" . filemtime(__FILE__))) . "-" . basename($filename);
+			$tplFile = $this->_dir . "/tpl/tpl-" . sprintf("%u", crc32($filename . "@" . filemtime(__FILE__))) . "-" . basename($filename);
 
 			if(is_file($tplFile) && filemtime($tplFile) > filemtime($filename)) {
 				$this->_require($tplFile, $data);
