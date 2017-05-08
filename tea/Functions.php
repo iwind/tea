@@ -3,7 +3,9 @@
 namespace {
 
 	use tea\Action;
+	use tea\Arrays;
 	use tea\Request;
+	use tea\Tea;
 
 	/**
 	 * 打印数据的内容
@@ -145,7 +147,7 @@ namespace {
 			$GLOBALS["TEA_CONFIGS"][$config] = $ret;
 			return null;
 		}
-		$ret = tea\Arrays::get($ret, $options);
+		$ret = Arrays::get($ret, $options);
 
 		$GLOBALS["TEA_CONFIGS"][$config] = $ret;
 		return $ret;
@@ -205,11 +207,12 @@ namespace {
 		$basename = $isResource ? "/" .  basename($action) : "";
 
 		if (TEA_ENABLE_ACTION_PARAM) {
-			$url = TEA_URL_BASE . TEA_URL_DISPATCHER . "?__ACTION__=/" . $dirname . $basename;
+			$url = Tea::shared()->dispatcher() . "?__ACTION__=/" . $dirname . $basename;
 		}
 		else {
-			$url = TEA_URL_BASE . TEA_URL_DISPATCHER . "/" . $dirname . $basename;
+			$url = Tea::shared()->dispatcher() . "/" . $dirname . $basename;
 		}
+
 		if (!empty($params)) {
 			if (strstr($url, "?")) {
 				$url .= "&" . http_build_query($params);

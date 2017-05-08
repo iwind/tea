@@ -30,6 +30,24 @@ class Tea {
 		return $this->_request;
 	}
 
+	/**
+	 * 当前应用的基础URL
+	 *
+	 * @return string
+	 */
+	public function base() {
+		return rtrim(TEA_URL_BASE, "/");
+	}
+
+	/**
+	 * 当前应用脚本分发URL
+	 *
+	 * @return string
+	 */
+	public function dispatcher() {
+		return rtrim(TEA_URL_BASE, "/") . "/" . trim(TEA_URL_DISPATCHER, "/");
+	}
+
 	public function addDirective($directive, $filter) {
 		if (is_string($filter)) {
 			$filter = call_user_func([ $filter, "new" ]);
@@ -74,6 +92,12 @@ class Tea {
 		$uri = $_SERVER["REQUEST_URI"];
 		$query = parse_url($uri);
 		$originPath = $query["path"];
+
+		$prefix = rtrim(TEA_URL_BASE, "/") . "/" . ltrim(TEA_URL_DISPATCHER, "/");
+		if (!is_empty($prefix)) {
+			$originPath = preg_replace("/^" . preg_quote($prefix, "/") . "/", "", $originPath);
+		}
+		$originPath = "/" . $originPath;
 
 		/**
 		 * 执行通用过滤器

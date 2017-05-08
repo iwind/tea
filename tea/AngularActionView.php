@@ -10,8 +10,7 @@ class AngularActionView extends ActionView {
 		$module = $this->action()->module();
 		$parent = $this->action()->parent();
 		$viewName = $this->action()->view();
-		$base = TEA_URL_BASE;
-		$dispatcher = TEA_URL_DISPATCHER;
+		$base = Tea::shared()->dispatcher();
 		$actionParam = TEA_ENABLE_ACTION_PARAM ? "true" : "false";
 
 		$realParent = $parent;
@@ -39,7 +38,7 @@ class AngularActionView extends ActionView {
 			"inject" => "<script type=\"text/javascript\">\n window.TEA = { 
 	\"ACTION\": {
 		\"data\":{$json},
-		\"base\":\"{$base}{$dispatcher}\",
+		\"base\":\"{$base}\",
 		\"module\":\"{$module}\",
 		\"parent\":\"{$parent}\",
 		\"actionParam\": {$actionParam}
