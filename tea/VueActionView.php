@@ -46,7 +46,7 @@ class VueActionView extends ActionView {
 	}	
 }; \n</script>
 <script type=\"text/javascript\" src=\"" . $urlBase . "/js/vue.min.js\"></script>
-<script type=\"text/javascript\" src=\"" . $urlBase . "/js/tea-vue.js\"></script>{$js}{$css}"
+<script type=\"text/javascript\" src=\"" . $urlBase . "/js/vue.tea.js\"></script>{$js}{$css}"
 		];
 
 		parent::show();

@@ -8,7 +8,6 @@ class Must {
 
 	private $_field;
 	private $_value;
-	private $_message;
 
 	public static function new () {
 		return self::shared();
@@ -158,6 +157,13 @@ class Must {
 		return $this;
 	}
 
+	public function match($regexp, $message) {
+		if (!preg_match($regexp, $this->_value)) {
+			$this->_throw($message);
+		}
+		return $this;
+	}
+
 	public function equal($value, $message) {
 		if ($value !== $this->_value) {
 			$this->_throw($message);
@@ -167,10 +173,21 @@ class Must {
 
 	/**
 	 * 检查是否符合Email规则
+	 *
+	 * @param string $message 提示信息
+	 * @return $this
 	 */
 	public function email($message) {
 		$regex = "/^[a-z0-9]+([\\._\\-\\+]*[a-z0-9]+)*@([a-z0-9]+[\\-a-z0-9]*[a-z0-9]+\\.)+[a-z0-9]+$/i";
 		if (!preg_match($regex, $this->_value)) {
+			$this->_throw($message);
+		}
+		return $this;
+	}
+
+	public function if(callable $fn, $message) {
+		$return = call_user_func($fn, $this->_value);
+		if (!$return) {
 			$this->_throw($message);
 		}
 		return $this;
