@@ -11,6 +11,7 @@ class AngularActionView extends ActionView {
 		$parent = $this->action()->parent();
 		$viewName = $this->action()->view();
 		$base = Tea::shared()->dispatcher();
+		$urlBase = rtrim(TEA_URL_BASE, "/");
 		$actionParam = TEA_ENABLE_ACTION_PARAM ? "true" : "false";
 
 		$realParent = $parent;
@@ -44,8 +45,8 @@ class AngularActionView extends ActionView {
 		\"actionParam\": {$actionParam}
 	}	
 }; \n</script>
-<script type=\"text/javascript\" src=\"" . TEA_URL_BASE . "/js/angular.min.js?v=1.5.7\"></script>
-<script type=\"text/javascript\" src=\"" . TEA_URL_BASE . "/js/tea-angular.js?v=1.0.0\"></script>{$js}{$css}"
+<script type=\"text/javascript\" src=\"" . $urlBase . "/js/angular.min.js?v=1.5.7\"></script>
+<script type=\"text/javascript\" src=\"" . $urlBase . "/js/tea-angular.js?v=1.0.0\"></script>{$js}{$css}"
 		];
 
 		parent::show();

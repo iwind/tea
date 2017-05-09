@@ -11,6 +11,7 @@ class VueActionView extends ActionView {
 		$parent = $this->action()->parent();
 		$viewName = $this->action()->view();
 		$base = Tea::shared()->dispatcher();
+		$urlBase = rtrim(TEA_URL_BASE, "/");
 		$actionParam = TEA_ENABLE_ACTION_PARAM ? "true" : "false";
 
 		$realParent = $parent;
@@ -44,8 +45,8 @@ class VueActionView extends ActionView {
 		\"actionParam\": {$actionParam}
 	}	
 }; \n</script>
-<script type=\"text/javascript\" src=\"" . TEA_URL_BASE . "/js/vue.min.js\"></script>
-<script type=\"text/javascript\" src=\"" . TEA_URL_BASE . "/js/tea-vue.js\"></script>{$js}{$css}"
+<script type=\"text/javascript\" src=\"" . $urlBase . "/js/vue.min.js\"></script>
+<script type=\"text/javascript\" src=\"" . $urlBase . "/js/tea-vue.js\"></script>{$js}{$css}"
 		];
 
 		parent::show();
